@@ -8,13 +8,13 @@ const client = new Client({
     host: "https://talentsoft.atlassian.net",
     authentication: {
         basic: {
-            username: "xxx",
-            apiToken: "xxx"
+            username: "cfolliet@talentsoft.com",
+            apiToken: "oXejQc9xTvONvCLBBZQcE791"
         }
     }
 });
 
-const nbMonths = 2;
+const nbMonths = 1;
 
 function getWeekDates() {
     const begin = dateFns.subMonths(new Date(), nbMonths)
@@ -58,21 +58,31 @@ function simulate(data, orderedWeeks) {
 }
 
 function displayEstimated(simulated) {
+    const data = [];
     const total = simulated.reduce((acc, value) => acc + value);
+
+    const firstWeek = dateFns.startOfWeek(new Date(), { weekStartsOn: 1 });
 
     simulated.forEach((x, i) => {
         const percentage = Math.floor(x * 100 / total)
         const array = new Array(percentage);
         array.fill('.')
         const dots = array.join('');
-        console.log(i + ': ', '.' + dots, x, percentage + '%')
+        //console.log(i + ': ', '.' + dots, x, percentage + '%')
+
+        data.push({
+            x: dateFns.addWeeks(firstWeek, i),
+            y: percentage
+        })
     })
+
+    return data;
 }
 
 function getData(issues) {
     const weeks = getWeekDates();
     const data = { unresolved: [], weeks: {} };
-    weeks.forEach(w => data.weeks[w] = { issues: [] });
+    weeks.forEach(w => data.weeks[w] = []);
 
     issues.forEach(issue => {
         if (issue.fields.resolutiondate) {
@@ -80,7 +90,7 @@ function getData(issues) {
             const endWeek = dateFns.startOfWeek(new Date());
             if (dateFns.compareAsc(isoDate, endWeek) < 0) {
                 const week = dateFns.startOfWeek(isoDate, { weekStartsOn: 1 });
-                data.weeks[week].issues.push(issue)
+                data.weeks[week].push(issue)
             }
         } else {
             data.unresolved.push(issue);
@@ -90,7 +100,7 @@ function getData(issues) {
 }
 
 function getEstimated(data) {
-    const orderedWeeks = Object.values(data.weeks).map(w => w.issues.length).sort((a, b) => a - b);
+    const orderedWeeks = Object.values(data.weeks).map(w => w.length).sort((a, b) => a - b);
     const theoricalMin = data.unresolved.length / orderedWeeks[orderedWeeks.length - 1];
     const theoricalMax = data.unresolved.length / orderedWeeks[0];
 
@@ -133,6 +143,7 @@ function getIssuesByEpic(issues) {
 }
 
 async function main() {
+    const result = [];
     const issues = await getIssues();
 
     //const data = getData(issues);
@@ -141,15 +152,35 @@ async function main() {
 
     const issuesByEpic = getIssuesByEpic(issues);
     Object.entries(issuesByEpic).forEach(([key, issues]) => {
-        console.log('Epic: ' + key)
+        let estimate = null;
+        //console.log('Epic: ' + key)
         const data = getData(issues);
         const estimated = getEstimated(data);
         if (estimated) {
-            displayEstimated(estimated)
+            estimate = displayEstimated(estimated)
         } else {
-            console.log('Infinity')
+            estimate = Infinity
         }
+
+        result.push({ epic: key, unresolved: data.unresolved.length, past: data.weeks, futur: estimate })
     })
+
+    return result;
 }
 
-main();
+//main();
+
+export async function get(req, res, next) {
+    // the `slug` parameter is available because this file
+    // is called [slug].json.js
+    const { slug } = req.params;
+
+    const data = await main();
+
+    if (data !== null) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(data));
+    } else {
+        next();
+    }
+}

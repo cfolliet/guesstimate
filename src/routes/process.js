@@ -14,7 +14,7 @@ const client = new Client({
     }
 });
 
-const nbMonths = 1;
+const nbMonths = 3;
 
 function getWeekDates() {
     const begin = dateFns.subMonths(new Date(), nbMonths)

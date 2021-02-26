@@ -10,8 +10,8 @@
 </script>
 
 <script>
+	import PastChart from "../components/PastChart.svelte";
 	export let data;
-	//console.log(Object.entries(data[0].past));
 </script>
 
 <svelte:head>
@@ -21,7 +21,10 @@
 <h1>Guesstimate</h1>
 {#each data as epic}
 	<h3>{epic.epic}</h3>
-	{#each Object.entries(epic.past) as [week, issues]}
-		<p>{week}: {issues.length} {issues[0] && issues[0].key}</p>
-	{/each}
+	<PastChart
+		id={epic.epic}
+		data={Object.entries(epic.past).map(([week, issues]) => {
+			return { x: week, y: issues.length };
+		})}
+	/>
 {/each}

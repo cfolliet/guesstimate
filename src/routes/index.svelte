@@ -38,6 +38,13 @@
 				? []
 				: epic.future.reduce(
 						(acc, value) => {
+							if (
+								acc.cumulative[acc.cumulative.length - 1] &&
+								acc.cumulative[acc.cumulative.length - 1].y >=
+									99
+							) {
+								return acc;
+							}
 							acc.percent.push(value);
 							const lastCumulative = acc.cumulative[
 								acc.cumulative.length - 1

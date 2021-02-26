@@ -23,6 +23,7 @@
                     {
                         label: "Cumulative",
                         data: data.cumulative,
+                        type: "line",
                     },
                 ],
             },

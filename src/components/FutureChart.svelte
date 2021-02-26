@@ -17,8 +17,12 @@
             data: {
                 datasets: [
                     {
-                        label: "nb stories",
-                        data: data,
+                        label: "Percentage",
+                        data: data.percent,
+                    },
+                    {
+                        label: "Cumulative",
+                        data: data.cumulative,
                     },
                 ],
             },
@@ -39,6 +43,7 @@
                                 beginAtZero: true,
                                 precision: 0,
                                 suggestedMax: 3,
+                                suggestedMax: 100,
                             },
                         },
                     ],

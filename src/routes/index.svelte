@@ -11,6 +11,7 @@
 
 <script>
 	import PastChart from "../components/PastChart.svelte";
+	import FutureChart from "../components/FutureChart.svelte";
 	import Unresolved from "../components/Unresolved.svelte";
 	export let data;
 </script>
@@ -31,6 +32,30 @@
 				return { x: week, y: issues.length };
 			})}
 		/>
-		<PastChart id={"future" + epic.epic} data={epic.future} />
+		<FutureChart
+			id={"future" + epic.epic}
+			data={!epic.future
+				? []
+				: epic.future.reduce(
+						(acc, value) => {
+							acc.percent.push(value);
+							const lastCumulative = acc.cumulative[
+								acc.cumulative.length - 1
+							]
+								? acc.cumulative[acc.cumulative.length - 1].y
+								: 0;
+
+							acc.cumulative.push({
+								x: value.x,
+								y: value.y + lastCumulative,
+							});
+							return acc;
+						},
+						{
+							percent: [],
+							cumulative: [],
+						}
+				  )}
+		/>
 	</main>
 {/each}

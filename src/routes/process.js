@@ -64,11 +64,7 @@ function displayEstimated(simulated) {
     const firstWeek = dateFns.startOfWeek(new Date(), { weekStartsOn: 1 });
 
     simulated.forEach((x, i) => {
-        const percentage = Math.floor(x * 100 / total)
-        const array = new Array(percentage);
-        array.fill('.')
-        const dots = array.join('');
-        //console.log(i + ': ', '.' + dots, x, percentage + '%')
+        const percentage = x * 100 / total;
 
         data.push({
             x: dateFns.addWeeks(firstWeek, i),

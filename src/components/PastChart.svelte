@@ -42,8 +42,8 @@
                     yAxes: [
                         {
                             ticks: {
+                                beginAtZero: true,
                                 precision: 0,
-                                suggestedMin: 0,
                                 suggestedMax: 3,
                             },
                         },
@@ -56,4 +56,12 @@
     afterUpdate(renderChart);
 </script>
 
-<canvas {id} width="2" height="1" />
+<div>
+    <canvas {id} width="2" height="1" />
+</div>
+
+<style>
+    div {
+        width: 400px;
+    }
+</style>

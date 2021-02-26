@@ -162,7 +162,7 @@ async function main() {
             estimate = Infinity
         }
 
-        result.push({ epic: key, unresolved: data.unresolved.length, past: data.weeks, futur: estimate })
+        result.push({ epic: key, unresolved: data.unresolved.length, past: data.weeks, future: estimate })
     })
 
     return result;

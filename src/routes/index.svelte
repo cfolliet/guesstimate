@@ -11,6 +11,7 @@
 
 <script>
 	import PastChart from "../components/PastChart.svelte";
+	import Unresolved from "../components/Unresolved.svelte";
 	export let data;
 </script>
 
@@ -21,10 +22,15 @@
 <h1>Guesstimate</h1>
 {#each data as epic}
 	<h3>{epic.epic}</h3>
-	<PastChart
-		id={epic.epic}
-		data={Object.entries(epic.past).map(([week, issues]) => {
-			return { x: week, y: issues.length };
-		})}
-	/>
+	<main>
+		<Unresolved count={epic.unresolved} />
+
+		<PastChart
+			id={"past" + epic.epic}
+			data={Object.entries(epic.past).map(([week, issues]) => {
+				return { x: week, y: issues.length };
+			})}
+		/>
+		<PastChart id={"future" + epic.epic} data={epic.future} />
+	</main>
 {/each}

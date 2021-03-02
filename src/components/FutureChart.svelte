@@ -17,17 +17,27 @@
             data: {
                 datasets: [
                     {
-                        label: "Percentage",
+                        label: "cette semaine",
                         data: data.percent,
+                        backgroundColor: "#dbf2f2",
+                        borderColor: "#63c8c8",
+                        borderWidth: "1",
                     },
                     {
-                        label: "Cumulative",
+                        label: "cette semaine ou avant",
                         data: data.cumulative,
                         type: "line",
+                        fill: false,
+                        borderColor: "#ffe0e6",
+                        backgroundColor: "#ffaebf",
                     },
                 ],
             },
             options: {
+                title: {
+                    display: true,
+                    text: "Probabilité de finir les stories:",
+                },
                 scales: {
                     xAxes: [
                         {
@@ -57,7 +67,7 @@
 </script>
 
 <div>
-    <canvas {id} width="2" height="1" />
+    <canvas {id} width="1" height="1" />
 </div>
 
 <style>

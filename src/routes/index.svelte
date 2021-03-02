@@ -10,59 +10,16 @@
 </script>
 
 <script>
-	import PastChart from "../components/PastChart.svelte";
-	import FutureChart from "../components/FutureChart.svelte";
-	import Unresolved from "../components/Unresolved.svelte";
+	import Epic from "../components/Epic.svelte";
 	export let data;
 </script>
 
 <svelte:head>
-	<title>Sapper project template</title>
+	<title>Guesstimate</title>
+	<link rel="stylesheet" href="https://unpkg.com/mvp.css" />
 </svelte:head>
 
 <h1>Guesstimate</h1>
 {#each data as epic}
-	<h3>{epic.epic}</h3>
-	<main>
-		<Unresolved count={epic.unresolved} />
-
-		<PastChart
-			id={"past" + epic.epic}
-			data={Object.entries(epic.past).map(([week, issues]) => {
-				return { x: week, y: issues.length };
-			})}
-		/>
-		<FutureChart
-			id={"future" + epic.epic}
-			data={!epic.future
-				? []
-				: epic.future.reduce(
-						(acc, value) => {
-							if (
-								acc.cumulative[acc.cumulative.length - 1] &&
-								acc.cumulative[acc.cumulative.length - 1].y >=
-									99
-							) {
-								return acc;
-							}
-							acc.percent.push(value);
-							const lastCumulative = acc.cumulative[
-								acc.cumulative.length - 1
-							]
-								? acc.cumulative[acc.cumulative.length - 1].y
-								: 0;
-
-							acc.cumulative.push({
-								x: value.x,
-								y: value.y + lastCumulative,
-							});
-							return acc;
-						},
-						{
-							percent: [],
-							cumulative: [],
-						}
-				  )}
-		/>
-	</main>
+	<Epic data={epic} />
 {/each}

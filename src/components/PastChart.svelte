@@ -17,12 +17,19 @@
             data: {
                 datasets: [
                     {
-                        label: "nb stories",
+                        label: "nombre",
                         data: data,
+                        backgroundColor: "#d7ecfb",
+                        borderColor: "#4eaeee",
+                        borderWidth: "1",
                     },
                 ],
             },
             options: {
+                title: {
+                    display: true,
+                    text: "Nombre de Stories 'Done' chaque semaines:",
+                },
                 scales: {
                     xAxes: [
                         {
@@ -51,7 +58,7 @@
 </script>
 
 <div>
-    <canvas {id} width="2" height="1" />
+    <canvas {id} width="1" height="1" />
 </div>
 
 <style>

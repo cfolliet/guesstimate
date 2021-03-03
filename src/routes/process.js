@@ -29,6 +29,12 @@ function getWeekDates() {
     return weeks;
 }
 
+async function getEpic(key) {
+    const fields = ['summary'];
+    const result = await client.issues.getIssue({ issueIdOrKey: key, fields: fields });
+    return result
+}
+
 async function getIssues(startAt = 0) {
     const jqlNF = "\"Product Line\" in (\"Perf & Comp\", \"Talent Review\", \"Talent Management > Career\") AND project = CAR AND issuetype != epic AND (resolved > \"-" + (nbMonths * 30) + "d\" OR resolved = null)"
     const jqlCC = "\"Product Line\" = \"Talent Management > Continuous Conversation\" AND (type != \"Technical Debt\" OR priority = High OR priority = Maximum) AND project = \"Continuous Conversation\" AND issuetype != epic AND (resolved > \"-" + (nbMonths * 30) + "d\" OR resolved = null)"
@@ -138,18 +144,31 @@ function getIssuesByEpic(issues) {
     return byEpic;
 }
 
+async function getAllEpics(keys) {
+    const epics = {};
+    for (const key of keys) {
+        epics[key] = await getEpic(key);
+    }
+
+    return epics
+}
+
 async function main() {
     const result = [];
     const issues = await getIssues();
+
+    const epicKeys = new Set(issues.filter(issue => issue.fields[EPIC_FIELD]).map(issue => issue.fields[EPIC_FIELD]));
+    const epics = await getAllEpics(epicKeys);
 
     //const data = getData(issues);
     //const estimated = getEstimated(data);
     //displayEstimated(estimated)
 
     const issuesByEpic = getIssuesByEpic(issues);
+
     Object.entries(issuesByEpic).forEach(([key, issues]) => {
+        let epic = epics[key];
         let estimate = null;
-        //console.log('Epic: ' + key)
         const data = getData(issues);
         const estimated = getEstimated(data);
         if (estimated) {
@@ -158,7 +177,9 @@ async function main() {
             estimate = Infinity
         }
 
-        result.push({ epic: key, unresolved: data.unresolved.length, past: data.weeks, future: estimate })
+        const summary = epic ? epic.fields.summary : null;
+
+        result.push({ epic: key, summary: summary, unresolved: data.unresolved.length, past: data.weeks, future: estimate })
     })
 
     return result;

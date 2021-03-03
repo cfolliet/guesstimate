@@ -6,7 +6,11 @@
 
 <section>
 	<aside>
-		<h3>{data.epic != "null" ? "Epic: " + data.epic : "Sans Epic"}</h3>
+		<h3>
+			{data.epic != "null"
+				? "Epic: " + data.epic + " " + data.summary
+				: "Sans Epic"}
+		</h3>
 		<small>Reste à faire: {data.unresolved} stories</small>
 		<p>
 			<PastChart

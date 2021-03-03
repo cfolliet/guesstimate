@@ -11,6 +11,7 @@
 		return { x: week, y: issues.length };
 	});
 
+	let bestFinish = null;
 	const futureChartData = !data.future
 		? []
 		: data.future.reduce(
@@ -28,9 +29,13 @@
 						? acc.cumulative[acc.cumulative.length - 1].y
 						: 0;
 
+					let newCumulative = value.y + lastCumulative;
+					if (bestFinish == null && newCumulative >= 80) {
+						bestFinish = value.x;
+					}
 					acc.cumulative.push({
 						x: value.x,
-						y: value.y + lastCumulative,
+						y: newCumulative,
 					});
 					return acc;
 				},
@@ -50,7 +55,15 @@
 				Sans Epic
 			{/if}
 		</h3>
-		<small>Reste à faire: {data.unresolved} stories</small>
+		<small
+			>Reste à faire: {data.unresolved} stories | Date de fin estimée: {bestFinish
+				? new Intl.DateTimeFormat("fr-FR", {
+						year: "numeric",
+						month: "long",
+						day: "numeric",
+				  }).format(new Date(bestFinish))
+				: "aucune"}</small
+		>
 		<p>
 			{#if hasPastData}
 				<PastChart id={"past" + data.epic} data={pastChartData} />

@@ -45,6 +45,9 @@
                             time: {
                                 unit: "week",
                                 isoWeekday: true,
+                                displayFormats: {
+                                    week: "D MMM",
+                                },
                             },
                         },
                     ],

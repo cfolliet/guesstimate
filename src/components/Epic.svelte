@@ -44,9 +44,11 @@
 <section>
 	<aside>
 		<h3>
-			{data.epic != "null"
-				? "Epic: " + data.epic + " " + data.summary
-				: "Sans Epic"}
+			{#if data.epic != "null"}
+				Epic: {data.summary} <sup>{data.epic}</sup>
+			{:else}
+				Sans Epic
+			{/if}
 		</h3>
 		<small>Reste à faire: {data.unresolved} stories</small>
 		<p>

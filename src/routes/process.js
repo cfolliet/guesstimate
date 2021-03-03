@@ -170,6 +170,9 @@ async function main() {
         let epic = epics[key];
         let estimate = null;
         const data = getData(issues);
+        if (data.unresolved.length == 0) {
+            return;
+        }
         const estimated = getEstimated(data);
         if (estimated) {
             estimate = displayEstimated(estimated)

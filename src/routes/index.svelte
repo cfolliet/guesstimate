@@ -14,12 +14,6 @@
 	export let data;
 </script>
 
-<svelte:head>
-	<title>Guesstimate</title>
-	<link rel="stylesheet" href="https://unpkg.com/mvp.css" />
-</svelte:head>
-
-<h1>Guesstimate</h1>
 {#each data as epic}
 	<Epic data={epic} />
 {/each}

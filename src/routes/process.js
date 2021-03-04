@@ -38,7 +38,7 @@ async function getEpic(key) {
 async function getIssues(startAt = 0) {
     const jqlNF = "\"Product Line\" in (\"Perf & Comp\", \"Talent Review\", \"Talent Management > Career\") AND project = CAR AND issuetype != epic AND (resolved > \"-" + (nbMonths * 30) + "d\" OR resolved = null)"
     const jqlCC = "\"Product Line\" = \"Talent Management > Continuous Conversation\" AND (type != \"Technical Debt\" OR priority = High OR priority = Maximum) AND project = \"Continuous Conversation\" AND issuetype != epic AND (resolved > \"-" + (nbMonths * 30) + "d\" OR resolved = null)"
-    const fields = [EPIC_FIELD, 'resolutiondate'];
+    const fields = [EPIC_FIELD, 'resolutiondate', 'created'];
     const result = await client.issueSearch.searchForIssuesUsingJqlGet({ jql: jqlNF, fields: fields, maxResults: 100, startAt: startAt });
     let issues = result.issues;
     //console.log("result.maxResults", result.maxResults, "result.total", result.total);
@@ -83,8 +83,11 @@ function displayEstimated(simulated) {
 
 function getData(issues) {
     const weeks = getWeekDates();
-    const data = { unresolved: [], weeks: {} };
-    weeks.forEach(w => data.weeks[w] = []);
+    const data = { unresolved: [], weeks: {}, unresolvedWeek: {} };
+    weeks.forEach(w => {
+        data.weeks[w] = [];
+        data.unresolvedWeek[w] = [];
+    });
 
     issues.forEach(issue => {
         if (issue.fields.resolutiondate) {
@@ -95,6 +98,14 @@ function getData(issues) {
                 data.weeks[week].push(issue)
             }
         } else {
+            const isoDate = dateFns.parseISO(issue.fields.created)
+            const endWeek = dateFns.startOfWeek(new Date());
+            if (dateFns.compareAsc(isoDate, endWeek) < 0) {
+                const week = dateFns.startOfWeek(isoDate, { weekStartsOn: 1 });
+                if (data.unresolvedWeek[week]) {
+                    data.unresolvedWeek[week].push(issue)
+                }
+            }
             data.unresolved.push(issue);
         }
     });
@@ -182,7 +193,7 @@ async function main() {
 
         const summary = epic ? epic.fields.summary : null;
 
-        result.push({ epic: key, summary: summary, unresolved: data.unresolved.length, past: data.weeks, future: estimate })
+        result.push({ epic: key, summary: summary, unresolved: data.unresolved.length, past: data.weeks, new: data.unresolvedWeek, future: estimate })
     })
 
     return result;

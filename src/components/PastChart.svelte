@@ -18,9 +18,16 @@
                 datasets: [
                     {
                         label: "nombre",
-                        data: data,
+                        data: data.done,
                         backgroundColor: "#d7ecfb",
                         borderColor: "#4eaeee",
+                        borderWidth: "1",
+                    },
+                    {
+                        label: "new",
+                        data: data.new,
+                        //backgroundColor: "#d7ecfb",
+                        //borderColor: "#4eaeee",
                         borderWidth: "1",
                     },
                 ],

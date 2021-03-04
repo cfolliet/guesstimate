@@ -4,12 +4,20 @@
 	export let data;
 
 	let hasPastData = false;
-	const pastChartData = Object.entries(data.past).map(([week, issues]) => {
-		if (issues.length) {
-			hasPastData = true;
-		}
-		return { x: week, y: issues.length };
-	});
+	const pastChartData = {
+		done: Object.entries(data.past).map(([week, issues]) => {
+			if (issues.length) {
+				hasPastData = true;
+			}
+			return { x: week, y: issues.length };
+		}),
+		new: Object.entries(data.new).map(([week, issues]) => {
+			if (issues.length) {
+				hasPastData = true;
+			}
+			return { x: week, y: issues.length };
+		}),
+	};
 
 	let bestFinish = null;
 	const futureChartData = !data.future

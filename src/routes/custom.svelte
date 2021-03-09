@@ -1,9 +1,12 @@
 <script>
     import { afterUpdate } from "svelte";
     import Chart from "chart.js";
+    import { parseISO, isAfter } from "date-fns";
 
     let jql = '"Epic Link" = CAR-38718';
+    let zoomBeginDate;
     let data;
+
     async function submit() {
         const url =
             "customApi?" +
@@ -17,7 +20,21 @@
     let ctx;
     let chart;
 
-    function renderChart(data) {
+    function renderChart() {
+        if (!data) {
+            return;
+        }
+        const filteredData = JSON.parse(JSON.stringify(data));
+        if (zoomBeginDate) {
+            const date = parseISO(zoomBeginDate);
+            for (const datasetName in filteredData.datasets) {
+                const newSet = filteredData.datasets[datasetName].filter((r) =>
+                    isAfter(parseISO(r.x), date)
+                );
+                filteredData.datasets[datasetName] = newSet;
+            }
+        }
+
         ctx = document.getElementById("chart");
         if (chart) {
             chart.destroy();
@@ -28,21 +45,21 @@
                 datasets: [
                     {
                         label: "new",
-                        data: data.datasets.new,
+                        data: filteredData.datasets.new,
                         backgroundColor: "#ffe0e6",
                         borderColor: "#ff7c98",
                         borderWidth: "1",
                     },
                     {
                         label: "done",
-                        data: data.datasets.done,
+                        data: filteredData.datasets.done,
                         backgroundColor: "#dbf2f2",
                         borderColor: "#68caca",
                         borderWidth: "1",
                     },
                     {
                         label: "todo",
-                        data: data.datasets.todo,
+                        data: filteredData.datasets.todo,
                         type: "line",
                         fill: false,
                         backgroundColor: "#d7ecfb",
@@ -50,7 +67,7 @@
                     },
                     {
                         label: "20% confidence",
-                        data: data.datasets.twenty,
+                        data: filteredData.datasets.twenty,
                         borderDash: [3, 3],
                         type: "line",
                         fill: false,
@@ -59,7 +76,7 @@
                     },
                     {
                         label: "50% confidence",
-                        data: data.datasets.fifty,
+                        data: filteredData.datasets.fifty,
                         borderDash: [3, 3],
                         type: "line",
                         fill: false,
@@ -68,7 +85,7 @@
                     },
                     {
                         label: "80% confidence",
-                        data: data.datasets.heighty,
+                        data: filteredData.datasets.heighty,
                         borderDash: [3, 3],
                         type: "line",
                         fill: false,
@@ -109,7 +126,7 @@
         });
     }
 
-    //afterUpdate(renderChart);
+    afterUpdate(renderChart);
 </script>
 
 <section>
@@ -125,5 +142,7 @@
     </p>
 </section>
 <section>
+    <label for="zoom-begin-date">Zoom to begin date:&nbsp;</label>
+    <input id="zoom-begin-date" type="date" bind:value={zoomBeginDate} />
     <canvas id="chart" width="2" height="1" />
 </section>

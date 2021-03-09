@@ -5,12 +5,16 @@
 
     let jql = '"Epic Link" = CAR-38718';
     let zoomBeginDate;
+    let analyzeBeginDate;
     let data;
 
     async function submit() {
         const url =
             "customApi?" +
-            new URLSearchParams({ jql: encodeURIComponent(jql) });
+            new URLSearchParams({
+                jql: encodeURIComponent(jql),
+                analyzeBeginDate,
+            });
         const res = await fetch(url);
         data = await res.json();
         //console.log(data);
@@ -135,14 +139,27 @@
             >"Product Line" in ("Perf & Comp", "Talent Review", "Talent
             Management > Career") AND project = CAR AND resolved > "-180d"
             <br />
-            "Epic Link" = CAR-38718</span
+            "Epic Link" = CAR-38718
+            <br />
+            NewForm => "Epic Link" in (CAR-47157, CAR-55744, CAR-38718, CAR-44713,CAR-54459,
+            CAR-51141)</span
         >
         <input type="text" placeholder="JQL..." bind:value={jql} />
         <button on:click={submit}>Analyse</button>
     </p>
 </section>
 <section>
-    <label for="zoom-begin-date">Zoom to begin date:&nbsp;</label>
-    <input id="zoom-begin-date" type="date" bind:value={zoomBeginDate} />
+    <div>
+        <label for="zoom-begin-date">Zoom to begin date:&nbsp;</label>
+        <input id="zoom-begin-date" type="date" bind:value={zoomBeginDate} />
+    </div>
+    <div>
+        <label for="analyze-begin-date">Analyze since:&nbsp;</label>
+        <input
+            id="analyze-begin-date"
+            type="date"
+            bind:value={analyzeBeginDate}
+        />
+    </div>
     <canvas id="chart" width="2" height="1" />
 </section>

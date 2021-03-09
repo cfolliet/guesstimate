@@ -1,16 +1,30 @@
 const { Client } = require("jira.js");
 const dateFns = require('date-fns')
 
+let lastJql;
+let events;
+
 export async function get(req, res, next) {
-    const { jql } = req.query;
-    const data = {};
-    const issues = await getIssues(decodeURIComponent(jql));
-    const events = getEvents(issues);
-    const simulations = getSimulations(events);
+    const { jql, analyzeBeginDate } = req.query;
+
+    if (jql != lastJql) {
+        lastJql = jql;
+        const issues = await getIssues(decodeURIComponent(jql));
+        events = getEvents(issues);
+    }
+
+    let filteredEvents;
+
+    if (analyzeBeginDate != 'undefined') {
+        filteredEvents = events.filter(e => dateFns.isAfter(e.date, dateFns.parseISO(analyzeBeginDate)))
+    } else {
+        filteredEvents = events
+    }
+
+    const simulations = getSimulations(filteredEvents);
     const datasets = getDatasets(events, simulations)
 
-    data.issues = issues;
-    data.events = events;
+    const data = {};
     data.datasets = datasets;
 
     if (data !== null) {

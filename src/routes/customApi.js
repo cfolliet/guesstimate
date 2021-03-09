@@ -7,8 +7,7 @@ export async function get(req, res, next) {
     const issues = await getIssues(decodeURIComponent(jql));
     const events = getEvents(issues);
     const simulations = getSimulations(events);
-    console.log(simulations)
-    const datasets = getDatasets(events)
+    const datasets = getDatasets(events, simulations)
 
     data.issues = issues;
     data.events = events;
@@ -154,7 +153,7 @@ function simulate(nbTodos, doneByWeek) {
     return nbWeeks
 }
 
-function getDatasets(events) {
+function getDatasets(events, simulations) {
     const datasets = { new: [], done: [], todo: [] };
 
     events.forEach(event => {
@@ -162,6 +161,22 @@ function getDatasets(events) {
         datasets.done.push({ x: event.date, y: event.done })
         datasets.todo.push({ x: event.date, y: event.todo })
     })
+
+    const lastEvent = events[events.length - 1]
+    const twenty = simulations.find(simulation => simulation.confidence >= 20);
+    datasets.twenty = [
+        { x: lastEvent.date, y: lastEvent.todo },
+        { x: twenty.date, y: 0 }]
+
+    const fifty = simulations.find(simulation => simulation.confidence >= 50);
+    datasets.fifty = [
+        { x: lastEvent.date, y: lastEvent.todo },
+        { x: fifty.date, y: 0 }]
+
+    const heighty = simulations.find(simulation => simulation.confidence >= 80);
+    datasets.heighty = [
+        { x: lastEvent.date, y: lastEvent.todo },
+        { x: heighty.date, y: 0 }]
 
     return datasets;
 }

@@ -18,6 +18,7 @@
         const res = await fetch(url);
         data = await res.json();
         renderChart();
+        document.getElementById("content").scrollIntoView();
     }
 
     let ctx;
@@ -145,16 +146,29 @@
         <button on:click={submit}>Analyse</button>
     </p>
 </section>
-<section>
-    <p>
-        Zoom on last <input type="number" bind:value={zoom} min="2" /> weeks<br
-        />
-        Analyze on last <input type="number" bind:value={analyze} min="2" /> weeks
-    </p>
-    <canvas id="chart" width="2" height="1" />
+<section id="content">
+    <aside>
+        <div>
+            Zoom on last <input type="number" bind:value={zoom} min="2" /> weeks
+        </div>
+        <div>
+            Analyze on last
+            <input
+                type="number"
+                bind:value={analyze}
+                min="2"
+                on:change={submit}
+            /> weeks
+        </div>
+        <canvas id="chart" width="5" height="2" />
+    </aside>
 </section>
 
 <style>
+    aside {
+        width: 100%;
+    }
+
     input[type="number"] {
         width: 50px;
         display: inline-block;

@@ -5,7 +5,7 @@ let lastJql;
 let events;
 
 export async function get(req, res, next) {
-    const { jql, analyzeBeginDate } = req.query;
+    const { jql, analyze } = req.query;
 
     if (jql != lastJql) {
         lastJql = jql;
@@ -15,11 +15,8 @@ export async function get(req, res, next) {
 
     let filteredEvents;
 
-    if (analyzeBeginDate != 'undefined') {
-        filteredEvents = events.filter(e => dateFns.isAfter(e.date, dateFns.parseISO(analyzeBeginDate)))
-    } else {
-        filteredEvents = events
-    }
+    let analyzeBeginDate = dateFns.subWeeks(new Date(), analyze);
+    filteredEvents = events.filter(e => dateFns.isAfter(e.date, analyzeBeginDate))
 
     const simulations = getSimulations(filteredEvents);
     const datasets = getDatasets(events, simulations)

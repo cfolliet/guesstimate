@@ -1,11 +1,11 @@
 <script>
     import { afterUpdate } from "svelte";
     import Chart from "chart.js";
-    import { parseISO, isAfter } from "date-fns";
+    import { parseISO, isAfter, subWeeks } from "date-fns";
 
     let jql = '"Epic Link" = CAR-38718';
-    let zoomBeginDate;
-    let analyzeBeginDate;
+    let zoom = 13;
+    let analyze = 13;
     let data;
 
     async function submit() {
@@ -13,11 +13,10 @@
             "customApi?" +
             new URLSearchParams({
                 jql: encodeURIComponent(jql),
-                analyzeBeginDate,
+                analyze: analyze,
             });
         const res = await fetch(url);
         data = await res.json();
-        //console.log(data);
         renderChart();
     }
 
@@ -29,14 +28,12 @@
             return;
         }
         const filteredData = JSON.parse(JSON.stringify(data));
-        if (zoomBeginDate) {
-            const date = parseISO(zoomBeginDate);
-            for (const datasetName in filteredData.datasets) {
-                const newSet = filteredData.datasets[datasetName].filter((r) =>
-                    isAfter(parseISO(r.x), date)
-                );
-                filteredData.datasets[datasetName] = newSet;
-            }
+        const date = subWeeks(new Date(), zoom);
+        for (const datasetName in filteredData.datasets) {
+            const newSet = filteredData.datasets[datasetName].filter((r) =>
+                isAfter(parseISO(r.x), date)
+            );
+            filteredData.datasets[datasetName] = newSet;
         }
 
         ctx = document.getElementById("chart");
@@ -149,17 +146,11 @@
     </p>
 </section>
 <section>
-    <div>
-        <label for="zoom-begin-date">Zoom to begin date:&nbsp;</label>
-        <input id="zoom-begin-date" type="date" bind:value={zoomBeginDate} />
-    </div>
-    <div>
-        <label for="analyze-begin-date">Analyze since:&nbsp;</label>
-        <input
-            id="analyze-begin-date"
-            type="date"
-            bind:value={analyzeBeginDate}
-        />
-    </div>
+    <p>
+        Zoom on last <input type="numeric" bind:value={zoom} /> weeks
+    </p>
+    <p>
+        Analyze on last <input type="numeric" bind:value={analyze} /> weeks
+    </p>
     <canvas id="chart" width="2" height="1" />
 </section>

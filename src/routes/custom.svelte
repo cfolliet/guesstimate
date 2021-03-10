@@ -18,7 +18,7 @@
         const res = await fetch(url);
         data = await res.json();
         //console.log(data);
-        renderChart(data);
+        renderChart();
     }
 
     let ctx;
@@ -139,7 +139,7 @@
             >"Product Line" in ("Perf & Comp", "Talent Review", "Talent
             Management > Career") AND project = CAR AND resolved > "-180d"
             <br />
-            "Epic Link" = CAR-38718
+            CC => "Epic Link" in (CC-2305, CC-2315, CC-1406, CC-2223, CC-2374)
             <br />
             NewForm => "Epic Link" in (CAR-47157, CAR-55744, CAR-38718, CAR-44713,CAR-54459,
             CAR-51141)</span

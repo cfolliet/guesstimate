@@ -19,7 +19,8 @@ export async function get(req, res, next) {
     filteredEvents = events.filter(e => dateFns.isAfter(e.date, analyzeBeginDate))
 
     const simulations = getSimulations(filteredEvents);
-    const datasets = getDatasets(events, simulations)
+    const hardSimulations = getSimulations(filteredEvents, true);
+    const datasets = getDatasets(events, simulations, hardSimulations)
 
     const data = {};
     data.datasets = datasets;
@@ -99,12 +100,13 @@ function getEvents(issues) {
     return events
 }
 
-function getSimulations(events) {
+function getSimulations(events, hard) {
     if (events.every(e => e.type == 'done')) {
         return null;
     }
 
     const doneByWeek = getDoneByWeek(events)
+    const newByWeek = hard ? getNewByWeek(events) : null
     const nbTodos = events[events.length - 1].todo;
 
     const simulated = []
@@ -112,7 +114,7 @@ function getSimulations(events) {
     const nbSimulation = 1000000;
     let remainingSimulation = nbSimulation
     while (remainingSimulation--) {
-        const nbWeeks = simulate(nbTodos, doneByWeek);
+        const nbWeeks = simulate(nbTodos, doneByWeek, newByWeek);
         const previous = simulated[nbWeeks];
         if (previous) {
             simulated[nbWeeks]++;
@@ -153,18 +155,44 @@ function getDoneByWeek(events) {
     return Object.values(doneByWeek)
 }
 
-function simulate(nbTodos, doneByWeek) {
+function getNewByWeek(events) {
+    let newByWeek = {};
+
+    const firstEvent = events[0];
+    const firstWeekDate = dateFns.startOfWeek(firstEvent.date, { weekStartsOn: 1 });
+    const lastWeekDate = dateFns.startOfWeek(new Date(), { weekStartsOn: 1 });
+
+    dateFns.eachWeekOfInterval({
+        start: firstWeekDate,
+        end: lastWeekDate
+    }, { weekStartsOn: 1 }).forEach(week => newByWeek[week] = 0)
+
+    events.forEach(event => {
+        if (event.new > 0) {
+            const week = dateFns.startOfWeek(event.date, { weekStartsOn: 1 });
+            newByWeek[week] += event.new;
+        }
+    })
+
+    return Object.values(newByWeek)
+}
+
+function simulate(nbTodos, doneByWeek, newByWeek) {
     let currentUnresolved = nbTodos;
     let nbWeeks = 0;
-    while (currentUnresolved > 0) {
+    while (currentUnresolved > 0 && nbWeeks <= 104) {
         nbWeeks++;
-        const index = Math.floor(Math.random() * Math.floor(doneByWeek.length))
+        let index = Math.floor(Math.random() * Math.floor(doneByWeek.length))
         currentUnresolved -= doneByWeek[index];
+        if (newByWeek) {
+            index = Math.floor(Math.random() * Math.floor(newByWeek.length))
+            currentUnresolved += newByWeek[index];
+        }
     }
     return nbWeeks
 }
 
-function getDatasets(events, simulations) {
+function getDatasets(events, simulations, hardSimulations) {
     const datasets = { new: [], done: [], todo: [] };
 
     events.forEach(event => {
@@ -174,20 +202,36 @@ function getDatasets(events, simulations) {
     })
 
     const lastEvent = events[events.length - 1]
+    const lastPoint = { x: lastEvent.date, y: lastEvent.todo }
     const twenty = simulations.find(simulation => simulation.confidence >= 20);
     datasets.twenty = [
-        { x: lastEvent.date, y: lastEvent.todo },
+        lastPoint,
         { x: twenty.date, y: 0 }]
 
     const fifty = simulations.find(simulation => simulation.confidence >= 50);
     datasets.fifty = [
-        { x: lastEvent.date, y: lastEvent.todo },
+        lastPoint,
         { x: fifty.date, y: 0 }]
 
     const heighty = simulations.find(simulation => simulation.confidence >= 80);
     datasets.heighty = [
-        { x: lastEvent.date, y: lastEvent.todo },
+        lastPoint,
         { x: heighty.date, y: 0 }]
+
+    const hardTwenty = hardSimulations.find(simulation => simulation.confidence >= 20);
+    datasets.hardTwenty = [
+        lastPoint,
+        { x: hardTwenty.date, y: 0 }]
+
+    const hardFifty = hardSimulations.find(simulation => simulation.confidence >= 50);
+    datasets.hardFifty = [
+        lastPoint,
+        { x: hardFifty.date, y: 0 }]
+
+    const hardHeighty = hardSimulations.find(simulation => simulation.confidence >= 80);
+    datasets.hardHeighty = [
+        lastPoint,
+        { x: hardHeighty.date, y: 0 }]
 
     return datasets;
 }

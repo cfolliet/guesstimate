@@ -147,10 +147,16 @@
 </section>
 <section>
     <p>
-        Zoom on last <input type="numeric" bind:value={zoom} /> weeks
-    </p>
-    <p>
-        Analyze on last <input type="numeric" bind:value={analyze} /> weeks
+        Zoom on last <input type="number" bind:value={zoom} min="2" /> weeks<br
+        />
+        Analyze on last <input type="number" bind:value={analyze} min="2" /> weeks
     </p>
     <canvas id="chart" width="2" height="1" />
 </section>
+
+<style>
+    input[type="number"] {
+        width: 50px;
+        display: inline-block;
+    }
+</style>

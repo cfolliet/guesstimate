@@ -21,3 +21,9 @@
         </ul>
     </nav>
 </header>
+
+<style>
+    nav {
+        margin-bottom: 0;
+    }
+</style>

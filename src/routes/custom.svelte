@@ -41,6 +41,7 @@
         if (chart) {
             chart.destroy();
         }
+
         chart = new Chart(ctx, {
             type: "bar",
             data: {
@@ -94,33 +95,6 @@
                         backgroundColor: "#ebe0ff",
                         borderColor: "#b088ff",
                     },
-                    {
-                        label: "hard 20% confidence",
-                        data: filteredData.datasets.hardTwenty,
-                        borderDash: [3, 3],
-                        type: "line",
-                        fill: false,
-                        backgroundColor: "#fff5dd",
-                        borderColor: "#ffdc87",
-                    },
-                    {
-                        label: "hard 50% confidence",
-                        data: filteredData.datasets.hardFifty,
-                        borderDash: [3, 3],
-                        type: "line",
-                        fill: false,
-                        backgroundColor: "#fff5dd",
-                        borderColor: "#ffdc87",
-                    },
-                    {
-                        label: "hard 80% confidence",
-                        data: filteredData.datasets.hardHeighty,
-                        borderDash: [3, 3],
-                        type: "line",
-                        fill: false,
-                        backgroundColor: "#fff5dd",
-                        borderColor: "#ffdc87",
-                    },
                 ],
             },
             options: {
@@ -167,7 +141,9 @@
             CC => "Epic Link" in (CC-2305, CC-2315, CC-1406, CC-2223, CC-2374)
             <br />
             NewForm => "Epic Link" in (CAR-47157, CAR-55744, CAR-38718, CAR-44713,CAR-54459,
-            CAR-51141)</span
+            CAR-51141)
+            <br />
+            trse => "Epic Link" in (TRSE-44, TRSE-7, TRSE-153, TRSE-217, TRSE-225)</span
         >
         <input type="text" placeholder="JQL..." bind:value={jql} />
         <button on:click={submit}>Analyse</button>

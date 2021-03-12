@@ -1,28 +1,47 @@
 const { Client } = require("jira.js");
 const dateFns = require('date-fns')
 
+const client = new Client({
+    host: "https://talentsoft.atlassian.net",
+    authentication: {
+        basic: {
+            username: "cfolliet@talentsoft.com",
+            apiToken: "xx"
+        }
+    }
+});
+
 let lastJql;
 let events;
+let lastError;
 
 export async function get(req, res, next) {
     const { jql, analyze } = req.query;
+    const data = {};
 
     if (jql != lastJql) {
+        events = null
         lastJql = jql;
-        const issues = await getIssues(decodeURIComponent(jql));
-        events = getEvents(issues);
+        lastError = await validateJql(decodeURIComponent(jql));
+        if (!lastError) {
+            const issues = await getIssues(decodeURIComponent(jql));
+            events = getEvents(issues);
+        }
     }
 
-    let filteredEvents;
+    data.error = lastError;
 
-    let analyzeBeginDate = dateFns.subWeeks(new Date(), analyze);
-    filteredEvents = events.filter(e => dateFns.isAfter(e.date, analyzeBeginDate))
+    if (events) {
+        let filteredEvents;
 
-    const simulations = getSimulations(filteredEvents);
-    const datasets = getDatasets(filteredEvents, simulations)
+        let analyzeBeginDate = dateFns.subWeeks(new Date(), analyze);
+        filteredEvents = events.filter(e => dateFns.isAfter(e.date, analyzeBeginDate))
 
-    const data = {};
-    data.datasets = datasets;
+        const simulations = getSimulations(filteredEvents);
+        const datasets = getDatasets(filteredEvents, simulations)
+
+        data.datasets = datasets;
+    }
 
     if (data !== null) {
         res.setHeader('Content-Type', 'application/json');
@@ -32,17 +51,13 @@ export async function get(req, res, next) {
     }
 }
 
-async function getIssues(jql) {
-    const client = new Client({
-        host: "https://talentsoft.atlassian.net",
-        authentication: {
-            basic: {
-                username: "cfolliet@talentsoft.com",
-                apiToken: "xxx"
-            }
-        }
-    });
+async function validateJql(jql) {
+    const result = await client.jql.parseJqlQuery({ queries: [jql] })
+    const errors = result.queries[0].errors
+    return errors != undefined ? errors.join(';') : null
+}
 
+async function getIssues(jql) {
     const fields = ['resolutiondate', 'created'];
     let result;
 

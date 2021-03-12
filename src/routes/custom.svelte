@@ -5,10 +5,12 @@
     let jql = '"Epic Link" = CAR-38718';
     let analyze = 13;
     let data;
+    let ctx;
+    let chart;
 
     let promise = null;
-
-    async function submit() {
+    async function loadData() {
+        data = null;
         const url =
             "customApi?" +
             new URLSearchParams({
@@ -18,23 +20,17 @@
         promise = fetch(url);
         const res = await promise;
         data = await res.json();
-        renderChart();
-        document.getElementById("content").scrollIntoView();
     }
 
-    let ctx;
-    let chart;
-
     function renderChart() {
-        if (!data) {
-            return;
-        }
-
         ctx = document.getElementById("chart");
         if (chart) {
             chart.destroy();
         }
 
+        if (!data || data.error) {
+            return;
+        }
         chart = new Chart(ctx, {
             type: "bar",
             data: {
@@ -128,7 +124,15 @@
 <section>
     <aside>
         <p>
-            <input type="text" placeholder="JQL..." bind:value={jql} />
+            <input
+                type="text"
+                placeholder="JQL..."
+                bind:value={jql}
+                on:change={loadData}
+            />
+            {#if data && data.error}
+                <span>{data.error}</span>
+            {/if}
             <small
                 >"Product Line" in ("Perf & Comp", "Talent Review", "Talent
                 Management > Career") AND project = CAR AND resolved > "-180d"
@@ -147,12 +151,10 @@
                     type="number"
                     bind:value={analyze}
                     min="2"
-                    on:change={submit}
+                    on:change={loadData}
                 />
                 weeks</span
             >
-            <br />
-            <button on:click={submit}>Analyse</button>
         </p>
     </aside>
 </section>

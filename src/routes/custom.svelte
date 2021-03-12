@@ -131,7 +131,7 @@
                 on:change={loadData}
             />
             {#if data && data.error}
-                <span>{data.error}</span>
+                <samp>{data.error}</samp>
             {/if}
             <small
                 >"Product Line" in ("Perf & Comp", "Talent Review", "Talent
@@ -180,5 +180,10 @@
     input[type="number"] {
         width: 50px;
         display: inline-block;
+    }
+
+    samp {
+        border: 1px solid #ff7c98;
+        background-color: #ffe0e6;
     }
 </style>

@@ -1,12 +1,12 @@
 <script>
     import { afterUpdate } from "svelte";
     import Chart from "chart.js";
-    import { parseISO, isAfter, subWeeks } from "date-fns";
 
     let jql = '"Epic Link" = CAR-38718';
-    let zoom = 13;
     let analyze = 13;
     let data;
+
+    let promise = null;
 
     async function submit() {
         const url =
@@ -15,7 +15,8 @@
                 jql: encodeURIComponent(jql),
                 analyze: analyze,
             });
-        const res = await fetch(url);
+        promise = fetch(url);
+        const res = await promise;
         data = await res.json();
         renderChart();
         document.getElementById("content").scrollIntoView();
@@ -27,14 +28,6 @@
     function renderChart() {
         if (!data) {
             return;
-        }
-        const filteredData = JSON.parse(JSON.stringify(data));
-        const date = subWeeks(new Date(), zoom);
-        for (const datasetName in filteredData.datasets) {
-            const newSet = filteredData.datasets[datasetName].filter((r) =>
-                isAfter(parseISO(r.x), date)
-            );
-            filteredData.datasets[datasetName] = newSet;
         }
 
         ctx = document.getElementById("chart");
@@ -48,21 +41,21 @@
                 datasets: [
                     {
                         label: "new",
-                        data: filteredData.datasets.new,
+                        data: data.datasets.new,
                         backgroundColor: "#ffe0e6",
                         borderColor: "#ff7c98",
                         borderWidth: "1",
                     },
                     {
                         label: "done",
-                        data: filteredData.datasets.done,
+                        data: data.datasets.done,
                         backgroundColor: "#dbf2f2",
                         borderColor: "#68caca",
                         borderWidth: "1",
                     },
                     {
                         label: "todo",
-                        data: filteredData.datasets.todo,
+                        data: data.datasets.todo,
                         type: "line",
                         fill: false,
                         backgroundColor: "#d7ecfb",
@@ -70,7 +63,7 @@
                     },
                     {
                         label: "20% confidence",
-                        data: filteredData.datasets.twenty,
+                        data: data.datasets.twenty,
                         borderDash: [3, 3],
                         type: "line",
                         fill: false,
@@ -79,7 +72,7 @@
                     },
                     {
                         label: "50% confidence",
-                        data: filteredData.datasets.fifty,
+                        data: data.datasets.fifty,
                         borderDash: [3, 3],
                         type: "line",
                         fill: false,
@@ -88,7 +81,7 @@
                     },
                     {
                         label: "80% confidence",
-                        data: filteredData.datasets.heighty,
+                        data: data.datasets.heighty,
                         borderDash: [3, 3],
                         type: "line",
                         fill: false,
@@ -133,42 +126,52 @@
 </script>
 
 <section>
-    <p>
-        <span
-            >"Product Line" in ("Perf & Comp", "Talent Review", "Talent
-            Management > Career") AND project = CAR AND resolved > "-180d"
+    <aside>
+        <p>
+            <input type="text" placeholder="JQL..." bind:value={jql} />
+            <small
+                >"Product Line" in ("Perf & Comp", "Talent Review", "Talent
+                Management > Career") AND project = CAR AND resolved > "-180d"
+                <br />
+                CC => "Epic Link" in (CC-2305, CC-2315, CC-1406, CC-2223, CC-2374)
+                <br />
+                NewForm => "Epic Link" in (CAR-47157, CAR-55744, CAR-38718, CAR-44713,CAR-54459,
+                CAR-51141)
+                <br />
+                trse => "Epic Link" in (TRSE-44, TRSE-7, TRSE-153, TRSE-217, TRSE-225)</small
+            >
             <br />
-            CC => "Epic Link" in (CC-2305, CC-2315, CC-1406, CC-2223, CC-2374)
+            <span>
+                Analyze on last
+                <input
+                    type="number"
+                    bind:value={analyze}
+                    min="2"
+                    on:change={submit}
+                />
+                weeks</span
+            >
             <br />
-            NewForm => "Epic Link" in (CAR-47157, CAR-55744, CAR-38718, CAR-44713,CAR-54459,
-            CAR-51141)
-            <br />
-            trse => "Epic Link" in (TRSE-44, TRSE-7, TRSE-153, TRSE-217, TRSE-225)</span
-        >
-        <input type="text" placeholder="JQL..." bind:value={jql} />
-        <button on:click={submit}>Analyse</button>
-    </p>
+            <button on:click={submit}>Analyse</button>
+        </p>
+    </aside>
 </section>
 <section id="content">
     <aside>
-        <div>
-            Zoom on last <input type="number" bind:value={zoom} min="2" /> weeks
-        </div>
-        <div>
-            Analyze on last
-            <input
-                type="number"
-                bind:value={analyze}
-                min="2"
-                on:change={submit}
-            /> weeks
-        </div>
-        <canvas id="chart" width="5" height="2" />
+        {#await promise}
+            <p>Loading...</p>
+        {:then}
+            <canvas id="chart" width="5" height="2" />
+        {/await}
     </aside>
 </section>
 
 <style>
     aside {
+        width: 100%;
+    }
+
+    input[type="text"] {
         width: 100%;
     }
 

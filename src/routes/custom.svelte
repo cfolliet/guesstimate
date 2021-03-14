@@ -1,12 +1,25 @@
 <script>
-    import { afterUpdate } from "svelte";
+    import { onMount } from "svelte";
     import Chart from "chart.js";
 
     let jql = '"Epic Link" = CAR-38718';
     let analyze = 13;
     let data;
-    let ctx;
-    let chart;
+    let email;
+    let token;
+
+    onMount(() => {
+        const url = new URL(window.location.href);
+        email = url.searchParams.get("email");
+        token = url.searchParams.get("token");
+    });
+
+    function settingsChanged() {
+        const url = new URL(window.location.href);
+        url.searchParams.set("email", email);
+        url.searchParams.set("token", token);
+        window.history.pushState(null, null, url);
+    }
 
     let promise = null;
     async function loadData() {
@@ -22,107 +35,130 @@
         data = await res.json();
     }
 
-    function renderChart() {
-        ctx = document.getElementById("chart");
-        if (chart) {
-            chart.destroy();
-        }
+    function renderChart(node) {
+        let ctx = node;
+        let chart;
 
-        if (!data || data.error) {
-            return;
-        }
-        chart = new Chart(ctx, {
-            type: "bar",
-            data: {
-                datasets: [
-                    {
-                        label: "new",
-                        data: data.datasets.new,
-                        backgroundColor: "#ffe0e6",
-                        borderColor: "#ff7c98",
-                        borderWidth: "1",
+        return {
+            update(data) {
+                if (!data || data.error) {
+                    return;
+                }
+                chart = new Chart(ctx, {
+                    type: "bar",
+                    data: {
+                        datasets: [
+                            {
+                                label: "new",
+                                data: data.datasets.new,
+                                backgroundColor: "#ffe0e6",
+                                borderColor: "#ff7c98",
+                                borderWidth: "1",
+                            },
+                            {
+                                label: "done",
+                                data: data.datasets.done,
+                                backgroundColor: "#dbf2f2",
+                                borderColor: "#68caca",
+                                borderWidth: "1",
+                            },
+                            {
+                                label: "todo",
+                                data: data.datasets.todo,
+                                type: "line",
+                                fill: false,
+                                backgroundColor: "#d7ecfb",
+                                borderColor: "#d4ebfb",
+                            },
+                            {
+                                label: "20% confidence",
+                                data: data.datasets.twenty,
+                                borderDash: [3, 3],
+                                type: "line",
+                                fill: false,
+                                backgroundColor: "#ebe0ff",
+                                borderColor: "#b088ff",
+                            },
+                            {
+                                label: "50% confidence",
+                                data: data.datasets.fifty,
+                                borderDash: [3, 3],
+                                type: "line",
+                                fill: false,
+                                backgroundColor: "#ebe0ff",
+                                borderColor: "#b088ff",
+                            },
+                            {
+                                label: "80% confidence",
+                                data: data.datasets.heighty,
+                                borderDash: [3, 3],
+                                type: "line",
+                                fill: false,
+                                backgroundColor: "#ebe0ff",
+                                borderColor: "#b088ff",
+                            },
+                        ],
                     },
-                    {
-                        label: "done",
-                        data: data.datasets.done,
-                        backgroundColor: "#dbf2f2",
-                        borderColor: "#68caca",
-                        borderWidth: "1",
-                    },
-                    {
-                        label: "todo",
-                        data: data.datasets.todo,
-                        type: "line",
-                        fill: false,
-                        backgroundColor: "#d7ecfb",
-                        borderColor: "#d4ebfb",
-                    },
-                    {
-                        label: "20% confidence",
-                        data: data.datasets.twenty,
-                        borderDash: [3, 3],
-                        type: "line",
-                        fill: false,
-                        backgroundColor: "#ebe0ff",
-                        borderColor: "#b088ff",
-                    },
-                    {
-                        label: "50% confidence",
-                        data: data.datasets.fifty,
-                        borderDash: [3, 3],
-                        type: "line",
-                        fill: false,
-                        backgroundColor: "#ebe0ff",
-                        borderColor: "#b088ff",
-                    },
-                    {
-                        label: "80% confidence",
-                        data: data.datasets.heighty,
-                        borderDash: [3, 3],
-                        type: "line",
-                        fill: false,
-                        backgroundColor: "#ebe0ff",
-                        borderColor: "#b088ff",
-                    },
-                ],
-            },
-            options: {
-                title: {
-                    display: true,
-                    text: "Title",
-                },
-                scales: {
-                    xAxes: [
-                        {
-                            type: "time",
-                            time: {
-                                unit: "week",
-                                isoWeekday: true,
-                                displayFormats: {
-                                    week: "D MMM YYYY",
+                    options: {
+                        title: {
+                            display: true,
+                            text: "Title",
+                        },
+                        scales: {
+                            xAxes: [
+                                {
+                                    type: "time",
+                                    time: {
+                                        unit: "week",
+                                        isoWeekday: true,
+                                        displayFormats: {
+                                            week: "D MMM YYYY",
+                                        },
+                                    },
                                 },
-                            },
+                            ],
+                            yAxes: [
+                                {
+                                    ticks: {
+                                        beginAtZero: true,
+                                        precision: 0,
+                                        suggestedMax: 3,
+                                    },
+                                },
+                            ],
                         },
-                    ],
-                    yAxes: [
-                        {
-                            ticks: {
-                                beginAtZero: true,
-                                precision: 0,
-                                suggestedMax: 3,
-                            },
-                        },
-                    ],
-                },
+                    },
+                });
             },
-        });
+            destroy() {
+                if (chart) {
+                    chart.destroy();
+                }
+            },
+        };
     }
-
-    afterUpdate(renderChart);
 </script>
 
 <section>
     <aside>
+        <details>
+            <summary><small>Paramètres</small></summary>
+            <p>
+                <input
+                    type="text"
+                    bind:value={email}
+                    placeholder="Your email..."
+                    on:change={settingsChanged}
+                />
+                <input
+                    type="text"
+                    bind:value={token}
+                    placeholder="Jira token..."
+                    on:change={settingsChanged}
+                />
+            </p>
+            <hr />
+        </details>
         <p>
             <input
                 type="text"
@@ -163,7 +199,7 @@
         {#await promise}
             <p>Loading...</p>
         {:then}
-            <canvas id="chart" width="5" height="2" />
+            <canvas use:renderChart={data} id="chart" width="5" height="2" />
         {/await}
     </aside>
 </section>
@@ -171,6 +207,10 @@
 <style>
     aside {
         width: 100%;
+    }
+
+    details {
+        margin: 0;
     }
 
     input[type="text"] {

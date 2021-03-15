@@ -23,12 +23,18 @@
 
     let promise = null;
     async function loadData() {
+        if (!email && !token) {
+            return;
+        }
+
         data = null;
         const url =
             "customApi?" +
             new URLSearchParams({
                 jql: encodeURIComponent(jql),
                 analyze: analyze,
+                email,
+                token,
             });
         promise = fetch(url);
         const res = await promise;

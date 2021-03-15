@@ -1,30 +1,21 @@
 const { Client } = require("jira.js");
 const dateFns = require('date-fns')
 
-const client = new Client({
-    host: "https://talentsoft.atlassian.net",
-    authentication: {
-        basic: {
-            username: "cfolliet@talentsoft.com",
-            apiToken: "xx"
-        }
-    }
-});
-
 let lastJql;
 let events;
 let lastError;
 
 export async function get(req, res, next) {
-    const { jql, analyze } = req.query;
+    const { jql, analyze, email, token } = req.query;
     const data = {};
 
     if (jql != lastJql) {
         events = null
         lastJql = jql;
-        lastError = await validateJql(decodeURIComponent(jql));
+        const client = getJiraClient(email, token)
+        lastError = await validateJql(client, decodeURIComponent(jql));
         if (!lastError) {
-            const issues = await getIssues(decodeURIComponent(jql));
+            const issues = await getIssues(client, decodeURIComponent(jql));
             events = getEvents(issues);
         }
     }
@@ -51,13 +42,13 @@ export async function get(req, res, next) {
     }
 }
 
-async function validateJql(jql) {
+async function validateJql(client, jql) {
     const result = await client.jql.parseJqlQuery({ queries: [jql] })
     const errors = result.queries[0].errors
     return errors != undefined ? errors.join(';') : null
 }
 
-async function getIssues(jql) {
+async function getIssues(client, jql) {
     const fields = ['resolutiondate', 'created'];
     let result;
 
@@ -70,6 +61,18 @@ async function getIssues(jql) {
     }
 
     return issues;
+}
+
+function getJiraClient(email, token) {
+    return new Client({
+        host: "https://talentsoft.atlassian.net",
+        authentication: {
+            basic: {
+                username: email,
+                apiToken: token
+            }
+        }
+    });
 }
 
 function getEvents(issues) {

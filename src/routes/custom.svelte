@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import Chart from "chart.js";
 
-    let jql = '"Epic Link" = CAR-38718';
+    let jql = "";
     let analyze = 13;
     let data;
     let email;
@@ -10,12 +10,16 @@
 
     onMount(() => {
         const url = new URL(window.location.href);
+        analyze = url.searchParams.get("analyze") || 13;
+        jql = url.searchParams.get("jql");
         email = url.searchParams.get("email");
         token = url.searchParams.get("token");
     });
 
     function settingsChanged() {
         const url = new URL(window.location.href);
+        url.searchParams.set("analyze", analyze);
+        url.searchParams.set("jql", jql);
         url.searchParams.set("email", email);
         url.searchParams.set("token", token);
         window.history.pushState(null, null, url);
@@ -171,6 +175,7 @@
                 placeholder="JQL..."
                 bind:value={jql}
                 on:change={loadData}
+                on:change={settingsChanged}
             />
             {#if data && data.error}
                 <samp>{data.error}</samp>
@@ -194,6 +199,7 @@
                     bind:value={analyze}
                     min="2"
                     on:change={loadData}
+                    on:change={settingsChanged}
                 />
                 weeks</span
             >

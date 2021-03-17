@@ -33,7 +33,6 @@
             jql = element.value;
             element.selectedIndex = 0;
             settingsChanged();
-            loadData();
         }
     }
 
@@ -53,7 +52,8 @@
     }
 
     let promiseData = null;
-    async function loadData() {
+    $: loadData(email, token, jql, analyze);
+    async function loadData(email, token, jql, analyze) {
         if (!email && !token) {
             return;
         }
@@ -208,31 +208,17 @@
                 type="text"
                 placeholder="JQL..."
                 bind:value={jql}
-                on:change={loadData}
                 on:change={settingsChanged}
             />
             {#if data && data.error}
                 <samp>{data.error}</samp>
             {/if}
-            <small
-                >"Product Line" in ("Perf & Comp", "Talent Review", "Talent
-                Management > Career") AND project = CAR AND resolved > "-180d"
-                <br />
-                CC => "Epic Link" in (CC-2305, CC-2315, CC-1406, CC-2223, CC-2374)
-                <br />
-                NewForm => "Epic Link" in (CAR-47157, CAR-55744, CAR-38718, CAR-44713,CAR-54459,
-                CAR-51141)
-                <br />
-                trse => "Epic Link" in (TRSE-44, TRSE-7, TRSE-153, TRSE-217, TRSE-225)</small
-            >
-            <br />
             <span>
                 Analyze on last
                 <input
                     type="number"
                     bind:value={analyze}
                     min="2"
-                    on:change={loadData}
                     on:change={settingsChanged}
                 />
                 weeks</span

@@ -2,8 +2,9 @@
     import { onMount } from "svelte";
     import Chart from "chart.js";
 
-    let jql = "";
+    let jql;
     let analyze = 13;
+    let filters = [{ name: "filters...", value: null }];
     let data;
     let email;
     let token;
@@ -14,6 +15,7 @@
         jql = url.searchParams.get("jql");
         email = url.searchParams.get("email");
         token = url.searchParams.get("token");
+        loadFilters();
     });
 
     function settingsChanged() {
@@ -25,7 +27,32 @@
         window.history.pushState(null, null, url);
     }
 
-    let promise = null;
+    function selectFilterBlur() {
+        const element = document.getElementById("select-filter");
+        if (element.value != "undefined") {
+            jql = element.value;
+            element.selectedIndex = 0;
+            settingsChanged();
+            loadData();
+        }
+    }
+
+    async function loadFilters() {
+        if (!email && !token) {
+            return;
+        }
+        const url =
+            "filtersApi?" +
+            new URLSearchParams({
+                email,
+                token,
+            });
+        const res = await fetch(url);
+        const result = await res.json();
+        filters = filters.concat(result);
+    }
+
+    let promiseData = null;
     async function loadData() {
         if (!email && !token) {
             return;
@@ -40,8 +67,8 @@
                 email,
                 token,
             });
-        promise = fetch(url);
-        const res = await promise;
+        promiseData = fetch(url);
+        const res = await promiseData;
         data = await res.json();
     }
 
@@ -170,6 +197,13 @@
             <hr />
         </details>
         <p>
+            <select id="select-filter" on:blur={selectFilterBlur}>
+                {#each filters as filter}
+                    <option value={filter.jql}>
+                        {filter.name}
+                    </option>
+                {/each}
+            </select>
             <input
                 type="text"
                 placeholder="JQL..."
@@ -208,7 +242,7 @@
 </section>
 <section id="content">
     <aside>
-        {#await promise}
+        {#await promiseData}
             <p>Loading...</p>
         {:then}
             <canvas use:renderChart={data} id="chart" width="5" height="2" />

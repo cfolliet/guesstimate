@@ -4,7 +4,13 @@
 
     let jql;
     let analyze = 13;
-    let filters = [{ name: "Select JQL from your filters...", value: null }];
+    let filters = [
+        {
+            name:
+                "Select JQL from your filters (must contain 'guesstimate' in his name)...",
+            value: null,
+        },
+    ];
     let data;
     let email;
     let token;
@@ -214,6 +220,7 @@
             />
             {#if data && data.error}
                 <samp>{data.error}</samp>
+                <br />
             {/if}
             <span>
                 Analyze over the last
@@ -234,6 +241,13 @@
             <p>Loading...</p>
         {:then}
             <canvas use:renderChart={data} id="chart" width="5" height="2" />
+            <small>
+                Keep in mind: <br />- the analysis assume that no more issue
+                will be added<br />- if a lot of issues are already in progress,
+                you can presume the confidence is under estimated
+                <br />- the confidence can evolve if you change the number of
+                devs working on these issues
+            </small>
         {/await}
     </aside>
 </section>

@@ -4,7 +4,7 @@
 
     let jql;
     let analyze = 13;
-    let filters = [{ name: "filters...", value: null }];
+    let filters = [{ name: "Select JQL from your filters...", value: null }];
     let data;
     let email;
     let token;
@@ -86,21 +86,21 @@
                     data: {
                         datasets: [
                             {
-                                label: "new",
+                                label: "new issues",
                                 data: data.datasets.new,
                                 backgroundColor: "#ffe0e6",
                                 borderColor: "#ff7c98",
                                 borderWidth: "1",
                             },
                             {
-                                label: "done",
+                                label: "issues done",
                                 data: data.datasets.done,
                                 backgroundColor: "#dbf2f2",
                                 borderColor: "#68caca",
                                 borderWidth: "1",
                             },
                             {
-                                label: "todo",
+                                label: "remains to be done",
                                 data: data.datasets.todo,
                                 type: "line",
                                 fill: false,
@@ -113,8 +113,8 @@
                                 borderDash: [3, 3],
                                 type: "line",
                                 fill: false,
-                                backgroundColor: "#ebe0ff",
-                                borderColor: "#b088ff",
+                                backgroundColor: "#ffe0e6",
+                                borderColor: "#ff7c98",
                             },
                             {
                                 label: "50% confidence",
@@ -122,8 +122,8 @@
                                 borderDash: [3, 3],
                                 type: "line",
                                 fill: false,
-                                backgroundColor: "#ebe0ff",
-                                borderColor: "#b088ff",
+                                backgroundColor: "#fff5dd",
+                                borderColor: "#ffd36c",
                             },
                             {
                                 label: "80% confidence",
@@ -131,15 +131,16 @@
                                 borderDash: [3, 3],
                                 type: "line",
                                 fill: false,
-                                backgroundColor: "#ebe0ff",
-                                borderColor: "#b088ff",
+                                backgroundColor: "#dbf2f2",
+                                borderColor: "#68caca",
                             },
                         ],
                     },
                     options: {
                         title: {
                             display: true,
-                            text: "Title",
+                            text:
+                                "Percentage of confidence in finishing all issues",
                         },
                         scales: {
                             xAxes: [
@@ -151,6 +152,7 @@
                                         displayFormats: {
                                             week: "D MMM YYYY",
                                         },
+                                        tooltipFormat: "D MMM YYYY",
                                     },
                                 },
                             ],
@@ -179,7 +181,7 @@
 <section>
     <aside>
         <details>
-            <summary><small>Paramètres</small></summary>
+            <summary><small>Jira Parameters</small></summary>
             <p>
                 <input
                     type="text"
@@ -206,7 +208,7 @@
             </select>
             <input
                 type="text"
-                placeholder="JQL..."
+                placeholder="Analyze issues based on JQL..."
                 bind:value={jql}
                 on:change={settingsChanged}
             />
@@ -214,7 +216,7 @@
                 <samp>{data.error}</samp>
             {/if}
             <span>
-                Analyze on last
+                Analyze over the last
                 <input
                     type="number"
                     bind:value={analyze}

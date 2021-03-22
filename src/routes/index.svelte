@@ -201,6 +201,12 @@
                     placeholder="Jira token..."
                     on:change={settingsChanged}
                 />
+                <small
+                    ><a
+                        href="https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/"
+                        target="_blank">How to get my token ?</a
+                    ></small
+                >
             </p>
             <hr />
         </details>

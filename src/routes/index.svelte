@@ -21,7 +21,6 @@
         jql = url.searchParams.get("jql");
         email = url.searchParams.get("email");
         token = url.searchParams.get("token");
-        loadFilters();
     });
 
     function settingsChanged() {
@@ -42,8 +41,9 @@
         }
     }
 
-    async function loadFilters() {
-        if (!email && !token) {
+    $: loadFilters(email, token);
+    async function loadFilters(email, token) {
+        if (!email || !token) {
             return;
         }
         const url =
@@ -60,7 +60,7 @@
     let promiseData = null;
     $: loadData(email, token, jql, analyze);
     async function loadData(email, token, jql, analyze) {
-        if (!email && !token) {
+        if (!email || !token || !jql) {
             return;
         }
 
@@ -187,7 +187,12 @@
 <section>
     <aside>
         <details>
-            <summary><small>Jira Parameters</small></summary>
+            <summary
+                ><small>Jira Parameters</small>
+                {#if !email || !token}
+                    <mark>You need to put your credentials here</mark>
+                {/if}</summary
+            >
             <p>
                 <input
                     type="text"

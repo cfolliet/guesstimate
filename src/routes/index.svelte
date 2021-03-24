@@ -190,7 +190,7 @@
             <summary
                 ><small>Jira Parameters</small>
                 {#if !email || !token}
-                    <mark>You need to put your credentials here</mark>
+                    <mark> ⚠️ You need to put your credentials here</mark>
                 {/if}</summary
             >
             <p>
@@ -225,7 +225,7 @@
             </select>
             <input
                 type="text"
-                placeholder="Analyze issues based on JQL..."
+                placeholder="Analyze issues based on JQL... ex: 'Epic Link' in (CAR-XXX, CAR-YYY)"
                 bind:value={jql}
                 on:change={settingsChanged}
             />
@@ -243,6 +243,8 @@
                 />
                 weeks</span
             >
+            <br />
+            <small>💡 Bookmark the current URL to save the settings</small>
         </p>
     </aside>
 </section>
@@ -253,7 +255,7 @@
         {:then}
             <canvas use:renderChart={data} id="chart" width="5" height="2" />
             <small>
-                Keep in mind: <br />- the analysis assume that no more issue
+                📝 Keep in mind: <br />- the analysis assume that no more issue
                 will be added<br />- if a lot of issues are already in progress,
                 you can presume the confidence is under estimated
                 <br />- the confidence can evolve if you change the number of

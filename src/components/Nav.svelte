@@ -3,7 +3,10 @@
 
 <header>
     <nav>
-        <a href="."><img src="" alt="Guesstimate" /></a>
+        <h1>🔮 Guesstimate</h1>
+        <a href="mailto:cfolliet@talentsoft.com?subject=guesstimate"
+            ><i>Feedback / Questions</i></a
+        >
     </nav>
 </header>
 

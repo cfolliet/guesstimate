@@ -32,6 +32,7 @@ export async function get(req, res, next) {
         const datasets = getDatasets(filteredEvents, simulations)
 
         data.datasets = datasets;
+        data.statistics = getStatistics(data);
     }
 
     if (data !== null) {
@@ -208,4 +209,19 @@ function getDatasets(events, simulations) {
         lastPoint,
         { x: heighty.date, y: 0 }]
     return datasets;
+}
+
+function getStatistics(data) {
+    const statistics = { done: {} };
+
+    const doneValues = data.datasets.done.map(p => p.y);
+    statistics.done.sum = doneValues.reduce((previous, current) => current += previous);
+    statistics.done.average = statistics.done.sum / doneValues.length;
+
+    doneValues.sort((a, b) => a - b);
+    let lowMiddle = Math.floor((doneValues.length - 1) / 2);
+    let highMiddle = Math.ceil((doneValues.length - 1) / 2);
+    statistics.done.median = (doneValues[lowMiddle] + doneValues[highMiddle]) / 2;
+
+    return statistics;
 }

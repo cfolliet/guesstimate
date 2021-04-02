@@ -254,6 +254,15 @@
             <p>Loading...</p>
         {:then}
             <canvas use:renderChart={data} id="chart" width="5" height="2" />
+            {#if data}
+                <p>
+                    <small
+                        >Issues Done - sum: {data.statistics.done.sum} | average:
+                        {Math.round(data.statistics.done.average)} | median: {data
+                            .statistics.done.median}</small
+                    >
+                </p>
+            {/if}
             <small>
                 📝 Keep in mind: <br />- the analysis assume that no more issue
                 will be added<br />- if a lot of issues are already in progress,

@@ -1,9 +1,9 @@
 const { Client } = require("jira.js");
 
 export async function get(req, res, next) {
-    const { email, token } = req.query;
+    const { host, email, token } = req.query;
 
-    const client = getJiraClient(email, token)
+    const client = getJiraClient(host, email, token)
     const filters = await getFilters(client);
 
     if (filters !== null) {
@@ -19,9 +19,9 @@ async function getFilters(client) {
     return result.values;
 }
 
-function getJiraClient(email, token) {
+function getJiraClient(host, email, token) {
     return new Client({
-        host: "https://talentsoft.atlassian.net",
+        host: host,
         authentication: {
             basic: {
                 username: email,

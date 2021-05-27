@@ -6,13 +6,13 @@ let events;
 let lastError;
 
 export async function get(req, res, next) {
-    const { jql, analyze, email, token } = req.query;
+    const { jql, analyze, host, email, token } = req.query;
     const data = {};
 
     if (jql != lastJql) {
         events = null
         lastJql = jql;
-        const client = getJiraClient(email, token)
+        const client = getJiraClient(host, email, token)
         lastError = await validateJql(client, decodeURIComponent(jql));
         if (!lastError) {
             const issues = await getIssues(client, decodeURIComponent(jql));
@@ -64,9 +64,9 @@ async function getIssues(client, jql) {
     return issues;
 }
 
-function getJiraClient(email, token) {
+function getJiraClient(host, email, token) {
     return new Client({
-        host: "https://talentsoft.atlassian.net",
+        host: host,
         authentication: {
             basic: {
                 username: email,

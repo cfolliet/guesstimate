@@ -12,6 +12,7 @@
         },
     ];
     let data;
+    let host;
     let email;
     let token;
 
@@ -19,6 +20,7 @@
         const url = new URL(window.location.href);
         analyze = url.searchParams.get("analyze") || 13;
         jql = url.searchParams.get("jql");
+        host = url.searchParams.get("host");
         email = url.searchParams.get("email");
         token = url.searchParams.get("token");
     });
@@ -27,6 +29,7 @@
         const url = new URL(window.location.href);
         url.searchParams.set("analyze", analyze);
         url.searchParams.set("jql", jql);
+        url.searchParams.set("host", host);
         url.searchParams.set("email", email);
         url.searchParams.set("token", token);
         window.history.pushState(null, null, url);
@@ -41,14 +44,15 @@
         }
     }
 
-    $: loadFilters(email, token);
-    async function loadFilters(email, token) {
-        if (!email || !token) {
+    $: loadFilters(host, email, token);
+    async function loadFilters(host, email, token) {
+        if (!host || !email || !token) {
             return;
         }
         const url =
             "filtersApi?" +
             new URLSearchParams({
+                host,
                 email,
                 token,
             });
@@ -58,9 +62,9 @@
     }
 
     let promiseData = null;
-    $: loadData(email, token, jql, analyze);
-    async function loadData(email, token, jql, analyze) {
-        if (!email || !token || !jql) {
+    $: loadData(host, email, token, jql, analyze);
+    async function loadData(host, email, token, jql, analyze) {
+        if (!host || !email || !token || !jql) {
             return;
         }
 
@@ -70,6 +74,7 @@
             new URLSearchParams({
                 jql: encodeURIComponent(jql),
                 analyze: analyze,
+                host,
                 email,
                 token,
             });
@@ -189,11 +194,17 @@
         <details>
             <summary
                 ><small>Jira Parameters</small>
-                {#if !email || !token}
+                {#if !host || !email || !token}
                     <mark> ⚠️ You need to put your credentials here</mark>
                 {/if}</summary
             >
             <p>
+                <input
+                    type="text"
+                    bind:value={host}
+                    placeholder="Jira host (ex: https://my-company.atlassian.net)..."
+                    on:change={settingsChanged}
+                />
                 <input
                     type="text"
                     bind:value={email}

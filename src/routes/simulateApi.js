@@ -142,12 +142,12 @@ function getSimulations(events) {
 
     const currentWeekDate = dateFns.startOfWeek(new Date(), { weekStartsOn: 1 })
     let lastConfidence = 0
-    return simulated.filter(s => s).map((sim, index) => {
+    return simulated.map((sim, index) => {
         const date = dateFns.addWeeks(currentWeekDate, index)
         const percentage = sim * 100 / nbSimulation
         lastConfidence = lastConfidence + percentage
         return { date, percentage, confidence: lastConfidence }
-    });
+    }).filter(s => s);
 }
 
 function getDoneByWeek(events) {

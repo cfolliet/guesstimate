@@ -97,21 +97,21 @@
                     data: {
                         datasets: [
                             {
-                                label: "new issues",
+                                label: "# of new issues",
                                 data: data.datasets.new,
                                 backgroundColor: "#ffe0e6",
                                 borderColor: "#ff7c98",
                                 borderWidth: "1",
                             },
                             {
-                                label: "issues done",
+                                label: "# of issues done",
                                 data: data.datasets.done,
                                 backgroundColor: "#dbf2f2",
                                 borderColor: "#68caca",
                                 borderWidth: "1",
                             },
                             {
-                                label: "remains to be done",
+                                label: "# of remains to be done",
                                 data: data.datasets.todo,
                                 type: "line",
                                 fill: false,
